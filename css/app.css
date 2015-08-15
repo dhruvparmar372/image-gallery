@@ -20,6 +20,7 @@ html,body {
 /*Common Styles Begin*/
 
 .hidden { opacity: 0 !important; pointer-events: none; }
+.hide { display: none; }
 .pull-left { float: left; }
 .pull-right { float: left; }
 
@@ -74,23 +75,23 @@ header .main-text { margin: 0 auto; font-weight: 300; }
 
 /* Input Wrapper and Box Styles Begin*/
 #input-wrapper {
-position  : relative;
-width     : 50%;
-min-width : 300px;
+	position  : relative;
+	width     : 50%;
+	min-width : 300px;
 }
 
 #input-wrapper >.fa-spin-stack { display: none; }
 #input-wrapper >.fa-stack {
-position  : absolute;
-top       : 21px;
-right     : 7px;
-color     : rgb(200,77,75);
-font-size : 18px;
+	position  : absolute;
+	top       : 21px;
+	right     : 7px;
+	color     : rgb(200,77,75);
+	font-size : 18px;
 
--webkit-transition  : color 0.15s ease-in-out;
--moz-transition : color 0.15s ease-in-out;
--o-transition : color 0.15s ease-in-out;
-transition : color 0.15s ease-in-out;
+	-webkit-transition  : color 0.15s ease-in-out;
+	-moz-transition : color 0.15s ease-in-out;
+	-o-transition : color 0.15s ease-in-out;
+	transition : color 0.15s ease-in-out;
 }
 #input-wrapper >.fa-stack >.fa-stack-1x { color: #fff; font-size : 14px;}
 
@@ -100,35 +101,31 @@ transition : color 0.15s ease-in-out;
 
 
 #search-input {
-border        : 2px solid rgb(200,77,75);
-border-radius : 20px;
-height        : 45px;
-line-height   : 45px;
-color         : #333;
-outline       : none;
-padding       : 0 38px 0 16px;
-width         : 100%;
+	border        : 2px solid rgb(200,77,75);
+	border-radius : 20px;
+	height        : 45px;
+	line-height   : 45px;
+	color         : #333;
+	outline       : none;
+	padding       : 0 38px 0 16px;
+	width         : 100%;
 
--webkit-transition : border-color 0.15s ease-in-out;
--moz-transition : border-color 0.15s ease-in-out;
--o-transition : border-color 0.15s ease-in-out;
-transition : border-color 0.15s ease-in-out;
+	-webkit-transition : border-color 0.15s ease-in-out;
+	-moz-transition : border-color 0.15s ease-in-out;
+	-o-transition : border-color 0.15s ease-in-out;
+	transition : border-color 0.15s ease-in-out;
 }
 #search-input[disabled] { border-color : #dbdbdb; }
 /* Input Wrapper and Box Styles Begin*/
 
 
 
-.app-gallery >.images-list { 
-	list-style : none; 
-	padding    : 0; 
-	text-align : justify;
-}
-.app-gallery >.images-list:after {
-	content : '';
-	width   : 100%; /* Ensures there are at least 2 lines of text, so justification works */
-	display : inline-block;
-}
-.gallery-image-item { margin: 8px; display: inline-block; }
-.gallery-image { border-radius: 2px; }
+/* Gallery Styles Begin*/
+
+.app-gallery { max-width: 1170px; margin: 80px auto; }
+.gallery-row { margin-bottom: 10px; }
+.gallery-image { border-radius: 2px; margin-right: 10px; display: inline-block; }
+.gallery-image:last-child { margin-right: 0; }
+/* Gallery Styles End*/
+
 
