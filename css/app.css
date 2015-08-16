@@ -9,18 +9,18 @@ html {
 
 html,body {
 	position    : relative;
-	height      : 100%;
 	overflow-x  : hidden;
 	font-size   : 14px;
 	font-family : 'Open Sans', sans-serif;
 	margin      : 0;
+	min-height  : 100%;
 }
 
 
 /*Common Styles Begin*/
 
 .hidden { opacity: 0 !important; pointer-events: none; }
-.hide { display: none; }
+.hide { display: none !important; }
 .pull-left { float: left; }
 .pull-right { float: left; }
 
@@ -54,12 +54,7 @@ html,body {
 
 /* Header Styles Begin*/
 header {
-	/*position      : fixed;
-	top           : 0;
-	left          : 0;
-	right         : 0;*/
-	margin-bottom : 40px;
-	height        : 120px;
+	height        : 80px;
 	line-height   : 80px;
 	background    : rgb(200,77,75);
 	color         : #fff;
@@ -115,17 +110,60 @@ header .main-text { margin: 0 auto; font-weight: 300; }
 	-o-transition : border-color 0.15s ease-in-out;
 	transition : border-color 0.15s ease-in-out;
 }
-#search-input[disabled] { border-color : #dbdbdb; }
+/*#search-input[disabled] { border-color : #dbdbdb; }*/
 /* Input Wrapper and Box Styles Begin*/
 
 
 
 /* Gallery Styles Begin*/
 
-.app-gallery { max-width: 1170px; margin: 80px auto; }
+.app-gallery { 
+	max-width : 1170px; 
+	margin    : 40px auto; 
+}
 .gallery-row { margin-bottom: 10px; }
-.gallery-image { border-radius: 2px; margin-right: 10px; display: inline-block; }
+.gallery-image { 
+	border-radius : 2px; 
+	margin-right  : 10px; 
+	display       : inline-block; 
+}
 .gallery-image:last-child { margin-right: 0; }
+
+.gallery-detail-container {
+	position      : relative;
+	background    : #333;
+	max-height    : 0;
+	margin        : 10px 0;
+	border-radius : 2px;
+	text-align    : center;
+	-webkit-transition : max-height 0.2s linear;
+	-moz-transition : max-height 0.2s linear;
+	-o-transition : max-height 0.2s linear;
+	transition : max-height 0.2s linear;	
+}
+
+.gallery-detail-container.expanded { max-height: 1000px; }
+
+.detail-image { 
+	max-height    : 460px; 
+	max-width     : 60%; 
+	margin        : 10px 20px; 
+	border-radius : 2px; 
+}
+
+.gallery-detail-container >.nav-icon {
+	position  : absolute;
+	top       : 50%;
+	font-size : 48px;
+	color     : #fff;
+	-webkit-transform : translateY(-50%);
+	-moz-transform : translateY(-50%);
+	-o-transform : translateY(-50%);
+	transform : translateY(-50%);	
+
+}
+.gallery-detail-container >.nav-icon.previous { left: 20px; }
+.gallery-detail-container >.nav-icon.next { right: 20px; }
 /* Gallery Styles End*/
 
 

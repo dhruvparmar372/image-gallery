@@ -34,7 +34,7 @@ var data = {
 var Utils = {
 	add_class : function (element,class_name){
 		if(element && element.className.indexOf(class_name) === -1)
-			element.className = element.className?(document.className+" "+class_name):class_name;
+			element.className = element.className?(element.className+" "+class_name):class_name;
 		return element;
 	},
 	remove_class : function (element,class_name){
@@ -76,9 +76,7 @@ var Utils = {
     }
 };
 
-// (function(){
-// 	console.log('yo');
-// }())
+
 
 (function(){
 	//Gallery Plugin
@@ -98,15 +96,16 @@ var Utils = {
 		//create DOM Elements references
 		this.element = null;
 
-		this.initialize();
+		initialize.call(this);
 	}
 
-	Gallery.prototype.initialize = function(){
+	
+	//Initialize method for gallery
+	function initialize(){
 		console.log('init gallery');
 		build_layout.call(this);
 		load_images.call(this,render_images);
 	}
-
 	
 	//Build basic layout of the gallery.
 	function build_layout(){
@@ -148,11 +147,13 @@ var Utils = {
 		}
 		
 		while(i<images.length){
-			var thumb_path = Utils.get_thumb_url(images[i++]),
+			var original_path = images[i++],
+				thumb_path = Utils.get_thumb_url(original_path),
 				image = document.createElement('img');
 			
 			image.onload = image_loaded;
 			image.setAttribute('src',thumb_path);
+			image.setAttribute('data-original-path',"/images/"+original_path);
 			frag.push(image);
 		}
 	}
@@ -163,8 +164,17 @@ var Utils = {
 			var row = render_row.call(this,image_list);
 			this.element.appendChild(row);
 		}
+		
+		this.images = Utils.nodelist_to_array(document.querySelectorAll('.gallery-image'));
+		
+		if(typeof this.options.render_done === 'function')
+			this.options.render_done.call(null,image_list);
+
+		attach_events.call(this);
 	}
 
+	//Render one row of images. Calculates appropriate widths for each image element so that images
+	//in single row have equal heights and occupy entire parent width.
 	function render_row(image_list,row_element){
 		var row_width = this.element.offsetWidth,
 			max_height = this.options.max_row_height,
@@ -177,7 +187,15 @@ var Utils = {
 			return render_row.call(this,image_list,row_element);
 		}
 
-		if(row_element.childNodes.length){
+		if(!image_list.length){
+			var row_children = Utils.nodelist_to_array(row_element.childNodes);
+			row_children.forEach(function(image){
+				image.height = max_height;
+			});
+			return row_element;
+		}
+
+		if(row_element.childNodes && row_element.childNodes.length){
 			row_element.appendChild(image);
 			var row_children = Utils.nodelist_to_array(row_element.childNodes);
 			var frac = row_children.reduce(function(prevValue,curValue){
@@ -204,127 +222,168 @@ var Utils = {
 	}
 
 
+
+	//Attach Gallery related events.
+	function attach_events(){
+		var self = this,
+			gallery_click_cb = gallery_clicked.bind(this);
+		
+		this.element.onclick = gallery_click_cb;
+	}
+
+	function gallery_clicked(e){
+		//Single click event to rule them all.
+		var target = e.target,
+			target_class = target.className;
+		
+		if(target_class.indexOf('gallery-image') !== -1){
+			this.highlight_image(target);
+		}else if(target_class.indexOf('nav-icon') !== -1){
+			if(target_class.indexOf('previous') !== -1)
+				this.change_image(-1);
+			else
+				this.change_image(1);
+		}
+	}
+
+
+	//Scrolls body to current details box parent row
+	function set_scroll(){
+		var parent_row = this.current_details_box.previousSibling,
+			scroll_amount = parent_row.offsetTop;
+		if(scroll_amount)
+			window.scrollTo(0,scroll_amount);
+		//TODO Add smooth scrolling here
+	}
+
+
+	//Hide next/previous icons conditionally
+	function hide_icons(){
+		var index = this.images.indexOf(this.active_image),
+			previous_icon = this.current_details_box.querySelector('.nav-icon.previous'),
+			next_icon = this.current_details_box.querySelector('.nav-icon.next');
+
+		[previous_icon,next_icon].forEach(function(icon){
+			Utils.remove_class(icon,'hide');
+		});
+		
+		if(index === 0)
+			Utils.add_class(previous_icon,'hide');
+		else if(index === this.images.length - 1)
+			Utils.add_class(next_icon,'hide');
+	}
+
+
+
+	//Public Methods
+	
+	//highlights an image in a expanded container
+	Gallery.prototype.highlight_image = function(image){
+		
+		var self = this;
+		//if currently active image is being highlighted then simply toggle detail box.
+		if(image.className.indexOf('active') !== -1 && this.current_details_box){
+			Utils.remove_class(this.current_details_box,'expanded');
+			Utils.remove_class(image,'active');			
+			setTimeout(function(){
+				self.current_details_box.remove();
+				self.current_details_box = null;
+			},150);
+			return;
+		}
+
+		Utils.remove_class(this.active_image,'active');
+
+		var parent_row = image.parentElement,
+			new_image_src = image.getAttribute('data-original-path');
+
+		this.active_image = image;
+		if(this.current_details_box && this.current_details_box.previousSibling === parent_row){
+			//if same row element image is clicked
+			this.current_details_box.firstChild.setAttribute('src',new_image_src);
+		}else{
+			//remove current details box and append a new one
+			if(this.current_details_box)
+				this.current_details_box.remove();
+			
+			this.current_details_box = null;
+			var detailed_div = document.createElement('div'),
+				detailed_template = "<img class='detail-image' src='"+new_image_src+"'><i class='fa fa-arrow-circle-o-left clickable previous nav-icon'></i><i class='fa fa-arrow-circle-o-right clickable next nav-icon'></i>";
+
+			Utils.add_class(detailed_div,'gallery-detail-container');
+			detailed_div.innerHTML = detailed_template;
+			parent_row.insertAdjacentElement('afterend',detailed_div);
+			
+			setTimeout(function(){
+				Utils.add_class(detailed_div,'expanded');
+			});
+			this.current_details_box = detailed_div;
+		}
+		Utils.add_class(image,'active');
+		hide_icons.call(self);
+		setTimeout(function(){
+			set_scroll.call(self); //update scroll position
+		},120);
+
+	}
+
+
+	//add more images to gallery
+	Gallery.prototype.append_images = function(image_url){
+
+	}
+
+	//Next & Previous Image toggle
+	Gallery.prototype.change_image = function(offset){
+		//offset determines which image relative to current active image to show
+		var new_image = this.images[this.images.indexOf(this.active_image)+offset];
+		if(new_image)
+			this.highlight_image(new_image);
+	}
+
 })();
 
 
+(function(){
+
+	var Application = function(){
+
+		//input related methods and vars
+		var input_box = document.getElementById("input-wrapper"),
+			input = document.getElementById("search-input");
+
+		var search_submit = (function(e){
+			var self = this;
+			
+			Utils.add_class(input_box,'loading');
+			input.setAttribute("disabled","disabled");
+			
+			var loading_time = (Math.random()*2000)+1250;
+			//fake a loading time
+			setTimeout(function(){
+				Utils.remove_class(input_box,'loading');
+				input.removeAttribute("disabled");
+			},loading_time)
+			
+			Utils.supress_event(e);
+		}).bind(this);
+		input_box.onsubmit = search_submit;
+
+	}
+
+	window.onload = function(){
+		window.App = new Application();
+		App.gallery = new Gallery({
+			margin         : 10,
+			append_to      : "#main-content",
+			images         : data.images,
+			max_row_height : 180
+		});
+	}
+
+})();
 
 
-// //Our Gallery Component
-// var Gallery = function(options){
-// 	this.initialize(options);
-// }
-
-// Gallery.prototype.initialize = function(options){
-// 	if(!options){
-// 		console.err('gallery init without necessary options');
-// 		return 
-// 	}
-	
-// 	//setup gallery containers
-// 	var append_to = document.querySelector(options.append_to);
-// 	if(!append_to){
-// 		console.err('append_to container not found');
-// 		return 	
-// 	}
-
-// 	this.element = document.createElement("div");
-// 	this.element.setAttribute("class","app-gallery");
-	
-// 	append_to.appendChild(this.element);
-
-// 	if(options.images && options.images.length){
-// 		this.render_images(options.images);
-// 		this.bind_on_load();
-// 	}
-	
-// 	return this;
-// }
-
-// Gallery.prototype.render_images = function(images){
-// 	if(!images.length){
-// 		console.err('empty image list provided for rendering');
-// 		return
-// 	}
-	
-// 	var images_list = this.images_list || document.createElement('div');
-// 	Utils.add_class(images_list,'images-list max-width-wrapper');
-
-// 	if(!document.querySelector('.images-list')){ 
-// 		//append list if not already appended
-// 		this.element.appendChild(images_list);
-// 	}
-
-// 	var fragment = new DocumentFragment();
-// 	while(images.length){
-// 		var thumb_path = Utils.get_thumb_url(images.pop()),
-// 			image = document.createElement('img');
-// 		image.setAttribute('src',thumb_path);
-// 		image.setAttribute('class','gallery-image');
-// 		fragment.appendChild(image);
-// 	}
-
-// 	// images_list.appendChild(fragment.cloneNode(true));
-// }
-
-
-
-
-
-// var App = function(){
-	
-// 	//Utility Methods
-	
-
-	
-
-// 	var images; //store images array information
-	
-	
-// 	//Public methods on App
-// 	this.setup_data = function(data){
-// 		images = data.images;
-// 	}
-
-
-// 	//input related methods and vars
-// 	var input_box = document.getElementById("input-wrapper"),
-// 		input = document.getElementById("search-input");
-
-// 	var search_submit = (function(e){
-// 		var self = this;
-		
-// 		add_class(input_box,'loading');
-// 		input.setAttribute("disabled","disabled");
-		
-// 		var loading_time = (Math.random()*2000)+1250;
-// 		//fake a loading time
-// 		setTimeout(function(){
-// 			remove_class(input_box,'loading');
-// 			input.removeAttribute("disabled");
-// 			self.render_images();
-// 		},loading_time)
-		
-// 		supress_event(e);
-// 	}).bind(this);
-// 	input_box.onsubmit = search_submit;
-
-
-// 	function initialize(){
-// 		//do any other setup related stuff here.
-// 		console.log('app init');
-// 	}
-// 	initialize();
-// }
-
-window.onload = function(){
-	// var ImageApp = new App();
-	var gallery = new Gallery({
-		margin: 10,
-		append_to : "#main-content",
-		images : data.images,
-		max_row_height : 180		
-	});
-}
 
 
 
