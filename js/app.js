@@ -153,7 +153,7 @@ var Utils = {
 			
 			image.onload = image_loaded;
 			image.setAttribute('src',thumb_path);
-			image.setAttribute('data-original-path',"images/"+original_path);
+			image.setAttribute('data-original-path',thumb_path.replace('_thumb','_large_thumb'));
 			frag.push(image);
 		}
 	}
