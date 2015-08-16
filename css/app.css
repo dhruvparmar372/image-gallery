@@ -164,6 +164,16 @@ header .main-text { margin: 0 auto; font-weight: 300; }
 }
 .gallery-detail-container >.nav-icon.previous { left: 20px; }
 .gallery-detail-container >.nav-icon.next { right: 20px; }
+
+
+#gallery-loader {
+	margin      : 20px auto;
+	width       : 200px;
+	text-align  : center;
+	color       : rgb(200,77,75);
+	line-height : 45px;
+}
+#gallery-loader >.fa-spinner { font-size: 30px; }
 /* Gallery Styles End*/
 
 

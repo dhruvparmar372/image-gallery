@@ -113,6 +113,7 @@ var Utils = {
 			element = document.createElement('div');
 
 		Utils.add_class(element,"app-gallery");
+		element.innerHTML = "<div id='gallery-loader'><i class='fa fa-spin fa-spinner'></i><br>loading images</div>"
 		
 		if(append_to){
 			append_to.appendChild(element);
@@ -160,6 +161,9 @@ var Utils = {
 
 	//Callback when all images are loaded
 	function render_images(image_list){
+		//remove loader
+		this.element.querySelector("#gallery-loader").remove()
+		
 		while(image_list.length){
 			var row = render_row.call(this,image_list);
 			this.element.appendChild(row);
